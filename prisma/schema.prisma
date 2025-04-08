@@ -7,3 +7,17 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Vote {
+  id    String @id @default(cuid())
+  name  String
+  votes Int    @default(0)
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  name      String
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
