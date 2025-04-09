@@ -12,6 +12,7 @@ model Vote {
   id    String @id @default(cuid())
   name  String
   votes Int    @default(0)
+  users User[]
 }
 
 model Settings {
@@ -23,7 +24,9 @@ model Settings {
 }
 
 model User {
-  id       String  @id @default(cuid())
-  name     String
-  hasVoted Boolean @default(false)
+  id            String  @id @default(cuid())
+  name          String
+  socketId      String?
+  currentVote   Vote?   @relation(fields: [currentVoteId], references: [id])
+  currentVoteId String?
 }

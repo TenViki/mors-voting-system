@@ -1,12 +1,11 @@
 "use client";
 
-import { clearVotes, getVotes } from "@/actions/vote";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import React from "react";
-import AddVoteForm from "./AddVoteForm";
-import { Box, Button, Group, Stack, Text, Title } from "@mantine/core";
-import VoteTile from "./VoteTile";
 import { setVoteOpen } from "@/actions/settings";
+import { clearVotes, getVotes } from "@/actions/vote";
+import { Button, Group, Stack, Text, Title } from "@mantine/core";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import AddVoteForm from "./AddVoteForm";
+import VoteTile from "./VoteTile";
 
 const VoteSettings = () => {
   const voteQuery = useQuery({
@@ -30,7 +29,9 @@ const VoteSettings = () => {
 
   return (
     <div>
-      <Title mb={16}>Vote settings</Title>
+      <Title mb={16} order={2}>
+        Vote settings
+      </Title>
 
       <Group mb={16}>
         <AddVoteForm />

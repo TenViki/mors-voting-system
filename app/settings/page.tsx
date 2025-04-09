@@ -1,7 +1,8 @@
 import { validateAdmin } from "@/actions/admin";
+import { Box } from "@mantine/core";
 import { cookies } from "next/headers";
 import AdminLogin from "./AdminLogin";
-import VoteSettings from "./VoteSettings";
+import SettingsPage from "./SettingsPage";
 
 const page = async () => {
   const c = await cookies();
@@ -14,9 +15,16 @@ const page = async () => {
   }
 
   return (
-    <div className="py-4 px-8">
-      <VoteSettings />
-    </div>
+    <Box
+      className="py-4 px-8"
+      sx={{
+        flexGrow: 1,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <SettingsPage />
+    </Box>
   );
 };
 
