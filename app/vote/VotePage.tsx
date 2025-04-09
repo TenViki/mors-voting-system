@@ -1,8 +1,9 @@
 "use client";
 
+import { userLogout } from "@/actions/auth";
 import { getVotes } from "@/actions/vote";
 import { useSocket } from "@/providers/SocketProvider";
-import { Box } from "@mantine/core";
+import { Anchor, Box, Group, Text } from "@mantine/core";
 import { Vote } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect } from "react";
@@ -50,33 +51,40 @@ const VotePage = () => {
   }, [votesQuery.data]);
 
   return (
-    <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-      {voteOpened ? (
-        <div>
-          {votes ? (
-            votes.map((vote) => (
-              <div key={vote.id}>
-                <p>{vote.name}</p>
-              </div>
-            ))
-          ) : (
-            <p>No votes available.</p>
-          )}
-        </div>
-      ) : (
-        <Box
-          sx={{
-            flexGrow: 1,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
-          }}
-        >
-          Hlasování je momentálně uzavřeno. Počkejte na otevření hlasování.
-        </Box>
-      )}
-    </Box>
+    <>
+      <Group justify="space-between" px={16} py={8}>
+        <Text>Hlasování</Text>
+
+        <Anchor onClick={() => userLogout()}>Odhlásit se</Anchor>
+      </Group>
+      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+        {voteOpened ? (
+          <div>
+            {votes ? (
+              votes.map((vote) => (
+                <div key={vote.id}>
+                  <p>{vote.name}</p>
+                </div>
+              ))
+            ) : (
+              <p>No votes available.</p>
+            )}
+          </div>
+        ) : (
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
+            Hlasování je momentálně uzavřeno. Počkejte na otevření hlasování.
+          </Box>
+        )}
+      </Box>
+    </>
   );
 };
 

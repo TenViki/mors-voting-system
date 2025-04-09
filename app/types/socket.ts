@@ -17,6 +17,10 @@ export interface SocketService {
   getClientCount: () => number;
   broadcastToAll: (event: string, ...args: any) => void;
   broadcastToRoom: (roomId: string, event: string, ...args: any) => void;
+  registerCallback: (
+    event: string,
+    callback: (socket: Socket, ...args: any) => void
+  ) => void;
 }
 
 // Function to access the global socket service

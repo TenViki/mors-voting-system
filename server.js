@@ -12,6 +12,7 @@ const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
 const connectedClients = new Map(); // Store connected clients
+const registeredCallbacks = new Map(); // Store registered callbacks
 
 app.prepare().then(() => {
   const httpServer = createServer(handler);
@@ -22,6 +23,15 @@ app.prepare().then(() => {
     connectedClients.set(socket.id, socket); // Store the connected client
 
     io.emit("clients:count", connectedClients.size); // Emit the count of connected clients
+
+    // Register event listeners for the connected client
+    for (const [event, callbacks] of registeredCallbacks.entries()) {
+      for (const callback of callbacks) {
+        socket.on(event, (...args) => {
+          callback(socket, ...args); // Call the registered callback
+        });
+      }
+    }
 
     socket.on("disconnect", () => {
       connectedClients.delete(socket.id); // Remove the client on disconnect
@@ -43,6 +53,13 @@ app.prepare().then(() => {
     },
     broadcastToRoom: (roomId, event, ...args) => {
       io.to(roomId).emit(event, ...args);
+    },
+    registerCallback: (event, callback) => {
+      console.log("Registering callback for event:", event);
+      if (!registeredCallbacks.has(event)) {
+        registeredCallbacks.set(event, []);
+      }
+      registeredCallbacks.get(event).push(callback);
     },
   };
 

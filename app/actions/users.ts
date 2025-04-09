@@ -4,7 +4,11 @@ import prisma from "@/lib/prisma";
 import { validateAdmin } from "./admin";
 
 export const getUsers = async () => {
-  const users = await prisma.user.findMany();
+  const users = await prisma.user.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
 
   return users;
 };

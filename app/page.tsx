@@ -1,5 +1,6 @@
-import Image from "next/image";
-import { getSocketService, SocketService } from "./types/socket";
+import { validateUser } from "./actions/auth";
+import { SocketService } from "./types/socket";
+import UserLogin from "./UserLogin";
 import VotePage from "./vote/VotePage";
 
 // define socketService as global variable
@@ -9,6 +10,12 @@ declare global {
   }
 }
 
-export default function Home() {
+export default async function Home() {
+  const user = await validateUser(false);
+
+  if (!user) {
+    return <UserLogin />;
+  }
+
   return <VotePage />;
 }

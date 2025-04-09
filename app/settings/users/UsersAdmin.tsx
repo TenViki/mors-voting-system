@@ -41,10 +41,45 @@ const UsersAdmin = () => {
 
   const socket = useSocket();
 
+  const handleUserLogon = (user: User) => {
+    setUsers((prev) => {
+      // add socketId to user
+      const updatedUser = { ...user, socketId: user.socketId };
+      const existingUserIndex = prev.findIndex((u) => u.id === user.id);
+      if (existingUserIndex !== -1) {
+        const updatedUsers = [...prev];
+        updatedUsers[existingUserIndex] = updatedUser;
+        return updatedUsers;
+      }
+      return [...prev, updatedUser];
+    });
+  };
+
+  const handleUserLogoff = (user: User) => {
+    setUsers((prev) => {
+      // remove socketId from user
+      const updatedUser = { ...user, socketId: null };
+      const existingUserIndex = prev.findIndex((u) => u.id === user.id);
+      if (existingUserIndex !== -1) {
+        const updatedUsers = [...prev];
+        updatedUsers[existingUserIndex] = updatedUser;
+        return updatedUsers;
+      }
+
+      return prev;
+    });
+  };
+
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("user:logon", (user) => {});
+    socket.on("user:logon", handleUserLogon);
+    socket.on("user:logoff", handleUserLogoff);
+
+    return () => {
+      socket.off("user:logon", handleUserLogon);
+      socket.off("user:logoff", handleUserLogoff);
+    };
   }, [socket]);
 
   const reset = () => {
@@ -62,7 +97,9 @@ const UsersAdmin = () => {
         <Textarea
           placeholder="Jména uživatelů/škol..."
           miw={350}
+          minRows={6}
           mb={16}
+          autosize
           {...mutationForm.getInputProps("users")}
         />
 
