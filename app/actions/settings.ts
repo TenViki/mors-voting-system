@@ -43,6 +43,15 @@ export const setVoteOpen = async (isOpen: boolean) => {
     });
   }
 
+  if (isOpen) {
+    const allVotes = await prisma?.vote.findMany({
+      orderBy: {
+        id: "asc",
+      },
+    });
+    getSocketService().broadcastToAll("votes:update", allVotes);
+  }
+
   getSocketService().broadcastToAll("voting:state", isOpen);
 
   return isOpen;

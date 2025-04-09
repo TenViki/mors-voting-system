@@ -49,7 +49,11 @@ export const registerVote = async (voteId: string) => {
     },
   });
 
-  const allVotes = await prisma.vote.findMany();
+  const allVotes = await prisma.vote.findMany({
+    orderBy: {
+      id: "asc",
+    },
+  });
 
   const socketService = getSocketService();
   socketService.broadcastToAll("votes:update", allVotes);

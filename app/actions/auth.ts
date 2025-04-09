@@ -99,6 +99,9 @@ export const userLogout = async () => {
     data: {
       socketId: null,
     },
+    include: {
+      currentVote: true,
+    },
   });
   getSocketService().broadcastToAll("user:logoff", updatedUser);
   return updatedUser;

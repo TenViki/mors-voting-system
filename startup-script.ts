@@ -20,6 +20,9 @@ const handleSocketDisconnect = async (socket: Socket) => {
     data: {
       socketId: null,
     },
+    include: {
+      currentVote: true,
+    },
   });
 
   getSocketService().broadcastToAll("user:logoff", user);

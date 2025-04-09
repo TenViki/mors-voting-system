@@ -8,7 +8,11 @@ import { getIfVoteOpen, setVoteOpen } from "./settings";
 import { validateUser } from "./auth";
 
 export const getVotes = async () => {
-  const votes = await prisma.vote.findMany();
+  const votes = await prisma.vote.findMany({
+    orderBy: {
+      id: "asc",
+    },
+  });
   const isopen = await getIfVoteOpen();
 
   return {
