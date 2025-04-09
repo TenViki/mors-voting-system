@@ -37,6 +37,25 @@ export const validateVoteKey = async (throwError = true) => {
   return true;
 };
 
+export const loginVoteKey = async (key: string) => {
+  const voteKey = await prisma.settings.findFirst({
+    where: {
+      name: "voteKey",
+    },
+  });
+
+  if (!voteKey) {
+    throw new Error("Vote key not found");
+  }
+
+  if (voteKey.value !== key) {
+    throw new Error("Vote key not found");
+  }
+
+  const c = await cookies();
+  c.set("voteKey", key);
+};
+
 export const getVoteKey = async () => {
   await validateVoteKey();
 

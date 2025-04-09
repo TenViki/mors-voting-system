@@ -11,27 +11,27 @@ const SettingsPage = () => {
     <>
       <Title mb={16}>Nastavení</Title>
       <Tabs
-        defaultValue={"users"}
+        defaultValue={"votes"}
         sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
       >
         <TabsList mb={16}>
-          <Tabs.Tab value="users" leftSection={<LucideList size={16} />}>
+          <Tabs.Tab value="votes" leftSection={<LucideList size={16} />}>
             Hlasování
           </Tabs.Tab>
-          <Tabs.Tab value="votes" leftSection={<LucideUsers size={16} />}>
-            Uživatelé
+          <Tabs.Tab value="users" leftSection={<LucideUsers size={16} />}>
+            Hlasující
           </Tabs.Tab>
           <Tabs.Tab value="votekey" leftSection={<LucideKey size={16} />}>
             Hlasovací klíč
           </Tabs.Tab>
         </TabsList>
 
-        <TabsPanel value="users">
+        <TabsPanel value="votes">
           <VoteSettings />
         </TabsPanel>
 
         <TabsPanel
-          value="votes"
+          value="users"
           sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
         >
           {/* <VoteSettings /> */}
