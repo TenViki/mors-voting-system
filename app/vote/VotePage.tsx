@@ -1,7 +1,7 @@
 "use client";
 
 import { userLogout } from "@/actions/auth";
-import { getVotes } from "@/actions/vote";
+import { didVote, getVotes } from "@/actions/vote";
 import { useSocket } from "@/providers/SocketProvider";
 import { Anchor, Box, Group, Stack, Text } from "@mantine/core";
 import { Vote } from "@prisma/client";
@@ -9,11 +9,31 @@ import { useQuery } from "@tanstack/react-query";
 import { LucideCheck, LucideCircle, LucideX } from "lucide-react";
 import React, { useEffect } from "react";
 import VoteButton from "./VoteButton";
+import { registerVote } from "@/actions/voting";
+
+export const SPECIAL_VOTES: Record<
+  string,
+  { color: string; icon: React.ReactNode }
+> = {
+  Ano: {
+    color: "green",
+    icon: <LucideCheck size={"1em"} />,
+  },
+  Ne: {
+    color: "red",
+    icon: <LucideX size={"1em"} />,
+  },
+  "Zdržel se": {
+    color: "yellow",
+    icon: <LucideCircle size={"1em"} />,
+  },
+};
 
 const VotePage = () => {
   const socket = useSocket();
   const [votes, setVotes] = React.useState<Vote[] | null>(null);
   const [voteOpened, setVoteOpened] = React.useState(false);
+  const [userVoted, setUserVoted] = React.useState(false);
 
   const votesQuery = useQuery({
     queryKey: ["votes"],
@@ -21,6 +41,21 @@ const VotePage = () => {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
+
+  const userVotedQuery = useQuery({
+    queryKey: ["userVoted"],
+    queryFn: () => didVote(),
+  });
+
+  const handleUserVoted = (voted: boolean) => {
+    setUserVoted(voted);
+  };
+
+  useEffect(() => {
+    if (userVotedQuery.data == undefined) return;
+
+    setUserVoted(userVotedQuery.data);
+  }, [userVotedQuery.data]);
 
   useEffect(() => {
     if (!socket) return;
@@ -32,6 +67,7 @@ const VotePage = () => {
       setVotes(null);
       setVoteOpened(false);
       votesQuery.refetch();
+      setUserVoted(false);
     });
 
     socket.on("voting:state", (state) => {
@@ -43,11 +79,14 @@ const VotePage = () => {
       setVotes(votes);
     });
 
+    socket.on("user:vote", handleUserVoted);
+
     return () => {
       socket.off("votes:add");
       socket.off("votes:clear");
       socket.off("voting:state");
       socket.off("votes:template");
+      socket.off("user:vote", handleUserVoted);
     };
   }, [socket]);
 
@@ -58,22 +97,6 @@ const VotePage = () => {
     }
   }, [votesQuery.data]);
 
-  const specialVotes: Record<string, { color: string; icon: React.ReactNode }> =
-    {
-      Ano: {
-        color: "green",
-        icon: <LucideCheck size={48} />,
-      },
-      Ne: {
-        color: "red",
-        icon: <LucideX size={48} />,
-      },
-      "Zdržel se": {
-        color: "yellow",
-        icon: <LucideCircle size={48} />,
-      },
-    };
-
   return (
     <>
       <Group justify="space-between" px={16} py={8}>
@@ -82,30 +105,31 @@ const VotePage = () => {
         <Anchor onClick={() => userLogout()}>Odhlásit se</Anchor>
       </Group>
       <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-        {voteOpened ? (
+        {!userVoted && voteOpened ? (
           <Stack sx={{ flexGrow: 1 }} px={16}>
             {votes ? (
               votes.map((vote) => (
                 <VoteButton
                   key={vote.id}
                   onClick={() => {
-                    // server action for votings
+                    registerVote(vote.id);
                   }}
                   size="xl"
-                  color={specialVotes[vote.name]?.color}
+                  color={SPECIAL_VOTES[vote.name]?.color}
                   sx={{ marginBottom: 8, flexGrow: 1 }}
                 >
                   <Box>
-                    {specialVotes[vote.name]?.icon && (
+                    {SPECIAL_VOTES[vote.name]?.icon && (
                       <Box
                         sx={{
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
+                          fontSize: "3rem",
                         }}
                         mb={16}
                       >
-                        {specialVotes[vote.name]?.icon}
+                        {SPECIAL_VOTES[vote.name]?.icon}
                       </Box>
                     )}
                     {vote.name}
@@ -116,6 +140,19 @@ const VotePage = () => {
               <p>No votes available.</p>
             )}
           </Stack>
+        ) : userVoted ? (
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+            }}
+            c="dimmed"
+          >
+            Děkujeme za váš hlas!
+          </Box>
         ) : (
           <Box
             sx={{
@@ -125,6 +162,7 @@ const VotePage = () => {
               alignItems: "center",
               height: "100%",
             }}
+            c="dimmed"
           >
             Hlasování je momentálně uzavřeno. Počkejte na otevření hlasování.
           </Box>

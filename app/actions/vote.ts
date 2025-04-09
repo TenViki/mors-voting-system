@@ -5,6 +5,7 @@ import { getSocketService } from "@/types/socket";
 import { voteTemplates } from "@/types/templates";
 import { validateAdmin } from "./admin";
 import { getIfVoteOpen, setVoteOpen } from "./settings";
+import { validateUser } from "./auth";
 
 export const getVotes = async () => {
   const votes = await prisma.vote.findMany();
@@ -34,6 +35,17 @@ export const clearVotes = async () => {
   await prisma.vote.deleteMany();
   await setVoteOpen(false);
 
+  await prisma.user.updateMany({
+    where: {
+      currentVoteId: {
+        not: null,
+      },
+    },
+    data: {
+      currentVoteId: null,
+    },
+  });
+
   getSocketService().broadcastToAll("votes:clear");
 };
 
@@ -51,4 +63,11 @@ export const applyTemplate = async (name: string) => {
 
   const votes = await prisma.vote.findMany();
   getSocketService().broadcastToAll("votes:template", votes);
+};
+
+export const didVote = async () => {
+  const user = await validateUser();
+  if (!user) throw new Error("Not authenticated");
+
+  return !!user.currentVoteId;
 };

@@ -3,13 +3,15 @@ import { addUsers, getUsers, resetUsers } from "@/actions/users";
 import { useSocket } from "@/providers/SocketProvider";
 import { Box, Flex, Textarea } from "@mantine/core";
 import { Form, useForm } from "@mantine/form";
-import { User } from "@prisma/client";
+import { User, Vote } from "@prisma/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import UserTile from "./UserTile";
 
 const UsersAdmin = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<(User & { currentVote?: Vote | null })[]>(
+    []
+  );
 
   const usersQuery = useQuery({
     queryKey: ["users"],
@@ -70,15 +72,48 @@ const UsersAdmin = () => {
     });
   };
 
+  const handleuserVoteSelect = (data: {
+    userId: string;
+    currentVote: Vote;
+  }) => {
+    console.log("user:vote_select", data);
+
+    const { userId, currentVote } = data;
+    setUsers((prev) => {
+      const existingUserIndex = prev.findIndex((u) => u.id === userId);
+      if (existingUserIndex !== -1) {
+        const updatedUser = { ...prev[existingUserIndex], currentVote };
+        const updatedUsers = [...prev];
+        updatedUsers[existingUserIndex] = updatedUser;
+        return updatedUsers;
+      }
+      return prev;
+    });
+  };
+
+  const resetUserVotes = () => {
+    setUsers((prev) => {
+      const updatedUsers = prev.map((user) => ({
+        ...user,
+        currentVote: null,
+      }));
+      return updatedUsers;
+    });
+  };
+
   useEffect(() => {
     if (!socket) return;
 
     socket.on("user:logon", handleUserLogon);
     socket.on("user:logoff", handleUserLogoff);
+    socket.on("user:vote_select", handleuserVoteSelect);
+    socket.on("votes:clear", resetUserVotes);
 
     return () => {
       socket.off("user:logon", handleUserLogon);
       socket.off("user:logoff", handleUserLogoff);
+      socket.off("user:vote_select", handleuserVoteSelect);
+      socket.off("votes:clear", resetUserVotes);
     };
   }, [socket]);
 

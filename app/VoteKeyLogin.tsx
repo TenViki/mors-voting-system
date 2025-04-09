@@ -27,6 +27,7 @@ const VoteKeyLogin = () => {
         length={6}
         autoFocus
         size="xl"
+        type="number"
         mt={16}
         sx={{
           display: "flex",

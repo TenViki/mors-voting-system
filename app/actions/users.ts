@@ -8,6 +8,9 @@ export const getUsers = async () => {
     orderBy: {
       name: "asc",
     },
+    include: {
+      currentVote: true,
+    },
   });
 
   return users;

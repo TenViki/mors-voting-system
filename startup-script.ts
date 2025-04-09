@@ -51,6 +51,9 @@ const handleClientAuth = async (socket: Socket, token: string) => {
       data: {
         socketId: socket.id,
       },
+      include: {
+        currentVote: true,
+      },
     });
 
     socket.emit("user:auth_res", true);

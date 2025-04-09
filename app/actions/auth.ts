@@ -33,15 +33,18 @@ export const userLogin = async (userId: string, socketId: string) => {
     data: {
       socketId,
     },
+    include: {
+      currentVote: true,
+    },
   });
 
   console.log("Broadcasting user:logon", updatedUser);
   getSocketService().broadcastToAll("user:logon", updatedUser);
 };
 
-export const validateUser = async (
-  throwError = true
-): Promise<false | User> => {
+export async function validateUser(throwError?: true): Promise<User>;
+export async function validateUser(throwError: false): Promise<User | false>;
+export async function validateUser(throwError = true) {
   const c = await cookies();
   const jwt = c.get("user_token");
 
@@ -77,7 +80,7 @@ export const validateUser = async (
     }
     return false;
   }
-};
+}
 
 export const userLogout = async () => {
   const user = await validateUser();
