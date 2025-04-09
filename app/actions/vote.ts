@@ -1,11 +1,11 @@
 "use server";
 
-import prisma from "@/lib/prisma";
 import { getSocketService } from "@/types/socket";
 import { voteTemplates } from "@/types/templates";
 import { validateAdmin } from "./admin";
 import { getIfVoteOpen, setVoteOpen } from "./settings";
 import { validateUser } from "./auth";
+import prisma from "@/lib/prisma";
 
 export const getVotes = async () => {
   const votes = await prisma.vote.findMany({

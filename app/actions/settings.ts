@@ -2,9 +2,10 @@
 
 import { getSocketService } from "@/types/socket";
 import { validateAdmin } from "./admin";
+import prisma from "@/lib/prisma";
 
 export const getIfVoteOpen = async () => {
-  const isVoteOpen = await prisma?.settings.findFirst({
+  const isVoteOpen = await prisma.settings.findFirst({
     where: {
       name: "isVoteOpen",
     },
@@ -19,21 +20,21 @@ export const getIfVoteOpen = async () => {
 export const setVoteOpen = async (isOpen: boolean) => {
   await validateAdmin();
 
-  const isVoteOpen = await prisma?.settings.findFirst({
+  const isVoteOpen = await prisma.settings.findFirst({
     where: {
       name: "isVoteOpen",
     },
   });
 
   if (!isVoteOpen) {
-    await prisma?.settings.create({
+    await prisma.settings.create({
       data: {
         name: "isVoteOpen",
         value: isOpen ? "true" : "false",
       },
     });
   } else {
-    await prisma?.settings.update({
+    await prisma.settings.update({
       where: {
         id: isVoteOpen.id,
       },
@@ -44,7 +45,7 @@ export const setVoteOpen = async (isOpen: boolean) => {
   }
 
   if (isOpen) {
-    const allVotes = await prisma?.vote.findMany({
+    const allVotes = await prisma.vote.findMany({
       orderBy: {
         id: "asc",
       },
