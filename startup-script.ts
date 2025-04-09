@@ -39,7 +39,7 @@ const handleClientAuth = async (socket: Socket, token: string) => {
       },
     });
 
-    if (!user || user.socketId) {
+    if (!user) {
       socket.emit("user:auth_res", false);
       return;
     }
@@ -54,6 +54,7 @@ const handleClientAuth = async (socket: Socket, token: string) => {
     });
 
     socket.emit("user:auth_res", true);
+    socket.join(user.id);
     getSocketService().broadcastToAll("user:logon", user);
   } catch (error) {
     console.error("Error authenticating user", error);
@@ -62,9 +63,19 @@ const handleClientAuth = async (socket: Socket, token: string) => {
   }
 };
 
+export const registerCallbacks = async () => {
+  getSocketService().registerCallback("disconnect", handleSocketDisconnect);
+  getSocketService().registerCallback("user:auth", handleClientAuth);
+};
+
 export default async () => {
-  setTimeout(() => {
-    getSocketService().registerCallback("disconnect", handleSocketDisconnect);
-    getSocketService().registerCallback("user:auth", handleClientAuth);
-  }, 200);
+  console.log("Waiting for socket service to be initialized...");
+  while (!(typeof global !== "undefined" && (global as any).socketService)) {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      await registerCallbacks();
+    } catch (error) {
+      console.error("Error registering callbacks", error);
+    }
+  }
 };

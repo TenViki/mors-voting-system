@@ -1,8 +1,9 @@
 "use client";
 
 import { setVoteOpen } from "@/actions/settings";
-import { clearVotes, getVotes } from "@/actions/vote";
-import { Button, Group, Stack, Text, Title } from "@mantine/core";
+import { applyTemplate, clearVotes, getVotes } from "@/actions/vote";
+import { voteTemplates } from "@/types/templates";
+import { Button, Group, Select, Stack, Text } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import AddVoteForm from "./AddVoteForm";
 import VoteTile from "./VoteTile";
@@ -27,13 +28,31 @@ const VoteSettings = () => {
     voteQuery.refetch();
   };
 
+  const applyTemplateAction = async (name: string) => {
+    await applyTemplate(name);
+    voteQuery.refetch();
+  };
+
   return (
     <div>
-      <Title mb={16} order={2}>
-        Vote settings
-      </Title>
-
       <Group mb={16}>
+        <Select
+          value={null}
+          placeholder="Apply template"
+          data={voteTemplates.map((template) => ({
+            value: template.name,
+            label: template.name,
+          }))}
+          disabled={
+            voteQuery.data?.open || (voteQuery.data?.votes.length || 0) > 0
+          }
+          onChange={(value) => {
+            if (value) {
+              applyTemplateAction(value);
+            }
+          }}
+        />
+
         <AddVoteForm />
 
         <Text c="dimmed">

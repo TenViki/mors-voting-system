@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { getSocketService } from "@/types/socket";
+import { voteTemplates } from "@/types/templates";
 import { validateAdmin } from "./admin";
 import { getIfVoteOpen, setVoteOpen } from "./settings";
 
@@ -34,4 +35,20 @@ export const clearVotes = async () => {
   await setVoteOpen(false);
 
   getSocketService().broadcastToAll("votes:clear");
+};
+
+export const applyTemplate = async (name: string) => {
+  await validateAdmin();
+
+  const template = voteTemplates.find((t) => t.name === name);
+  if (!template) throw new Error("Template not found");
+
+  await prisma.vote.createMany({
+    data: template.values.map((v) => ({
+      name: v,
+    })),
+  });
+
+  const votes = await prisma.vote.findMany();
+  getSocketService().broadcastToAll("votes:template", votes);
 };

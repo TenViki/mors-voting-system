@@ -3,6 +3,8 @@
 import { Tabs, TabsList, TabsPanel, Title } from "@mantine/core";
 import UsersAdmin from "./users/UsersAdmin";
 import VoteSettings from "./votes/VoteSettings";
+import { LucideKey, LucideList, LucideUsers } from "lucide-react";
+import VoteKey from "./votekey/VoteKey";
 
 const SettingsPage = () => {
   return (
@@ -13,8 +15,15 @@ const SettingsPage = () => {
         sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
       >
         <TabsList mb={16}>
-          <Tabs.Tab value="users">Hlasování</Tabs.Tab>
-          <Tabs.Tab value="votes">Uživatelé</Tabs.Tab>
+          <Tabs.Tab value="users" leftSection={<LucideList size={16} />}>
+            Hlasování
+          </Tabs.Tab>
+          <Tabs.Tab value="votes" leftSection={<LucideUsers size={16} />}>
+            Uživatelé
+          </Tabs.Tab>
+          <Tabs.Tab value="votekey" leftSection={<LucideKey size={16} />}>
+            Hlasovací klíč
+          </Tabs.Tab>
         </TabsList>
 
         <TabsPanel value="users">
@@ -27,6 +36,10 @@ const SettingsPage = () => {
         >
           {/* <VoteSettings /> */}
           <UsersAdmin />
+        </TabsPanel>
+
+        <TabsPanel value="votekey">
+          <VoteKey />
         </TabsPanel>
       </Tabs>
     </>
