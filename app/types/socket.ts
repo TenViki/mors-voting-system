@@ -21,6 +21,7 @@ export interface SocketService {
     event: string,
     callback: (socket: Socket, ...args: any) => void
   ) => void;
+  getSocket: (id: string) => Socket;
 }
 
 // Function to access the global socket service

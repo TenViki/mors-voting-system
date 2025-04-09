@@ -61,6 +61,9 @@ app.prepare().then(() => {
       }
       registeredCallbacks.get(event).push(callback);
     },
+    getSocket: (socketId) => {
+      return connectedClients.get(socketId);
+    },
   };
 
   // Make socketService globally available

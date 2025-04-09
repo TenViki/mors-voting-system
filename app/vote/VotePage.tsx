@@ -51,6 +51,11 @@ const VotePage = () => {
     setUserVoted(voted);
   };
 
+  const handleConnect = () => {
+    votesQuery.refetch();
+    userVotedQuery.refetch();
+  };
+
   useEffect(() => {
     if (userVotedQuery.data == undefined) return;
 
@@ -81,12 +86,15 @@ const VotePage = () => {
 
     socket.on("user:vote", handleUserVoted);
 
+    socket.on("connect", handleConnect);
+
     return () => {
       socket.off("votes:add");
       socket.off("votes:clear");
       socket.off("voting:state");
       socket.off("votes:template");
       socket.off("user:vote", handleUserVoted);
+      socket.off("connect", handleConnect);
     };
   }, [socket]);
 
@@ -162,6 +170,8 @@ const VotePage = () => {
               alignItems: "center",
               height: "100%",
             }}
+            px={64}
+            ta="center"
             c="dimmed"
           >
             Hlasování je momentálně uzavřeno. Počkejte na otevření hlasování.

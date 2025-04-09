@@ -39,7 +39,12 @@ export const userLogin = async (userId: string, socketId: string) => {
   });
 
   console.log("Broadcasting user:logon", updatedUser);
+
   getSocketService().broadcastToAll("user:logon", updatedUser);
+
+  const socket = getSocketService().getSocket(socketId);
+  if (!user) return;
+  socket.join(userId);
 };
 
 export async function validateUser(throwError?: true): Promise<User>;
