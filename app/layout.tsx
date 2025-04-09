@@ -1,12 +1,13 @@
+import { MantineProvider } from "@mantine/core";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import SocketProvider from "./providers/SocketProvider";
 import QueryClientContext from "./providers/QueryClientContext";
-import { MantineProvider } from "@mantine/core";
+import SocketProvider from "./providers/SocketProvider";
 
 import { emotionTransform, MantineEmotionProvider } from "@mantine/emotion";
 
+import StatusBar from "&/StatusBar";
 import "@mantine/core/styles.css";
 import { RootStyleRegistry } from "./EmotionRootStyleRegistry";
 
@@ -39,7 +40,10 @@ export default function RootLayout({
           <MantineEmotionProvider>
             <MantineProvider stylesTransform={emotionTransform}>
               <QueryClientContext>
-                <SocketProvider>{children}</SocketProvider>
+                <SocketProvider>
+                  {children}
+                  <StatusBar />
+                </SocketProvider>
               </QueryClientContext>
             </MantineProvider>
           </MantineEmotionProvider>

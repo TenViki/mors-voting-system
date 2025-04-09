@@ -1,3 +1,5 @@
+process.env.TURBOPACK = "1";
+
 const { createServer } = require("node:http");
 const next = require("next");
 const { Server } = require("socket.io");
@@ -19,9 +21,12 @@ app.prepare().then(() => {
     console.log("New client connected");
     connectedClients.set(socket.id, socket); // Store the connected client
 
+    io.emit("clients:count", connectedClients.size); // Emit the count of connected clients
+
     socket.on("disconnect", () => {
       connectedClients.delete(socket.id); // Remove the client on disconnect
       console.log("Client disconnected");
+      io.emit("clients:count", connectedClients.size); // Emit the count of connected clients
     });
   });
 
