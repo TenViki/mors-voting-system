@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node server.js --turbopack",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js",
+    "start": "PORT=6999 NODE_ENV=production node server.js",
     "lint": "next lint",
     "db:create": "docker compose -f db.yml up -d",
     "db:studio": "yarn prisma studio",
@@ -22,6 +22,7 @@
     "@mantine/emotion": "^7.17.4",
     "@mantine/form": "^7.17.4",
     "@mantine/hooks": "^7.17.4",
+    "@mantine/modals": "^7.17.4",
     "@prisma/client": "^6.6.0",
     "@tanstack/react-query": "^5.72.1",
     "@types/bcrypt": "^5.0.2",

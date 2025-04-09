@@ -532,6 +532,11 @@
   resolved "https://registry.yarnpkg.com/@mantine/hooks/-/hooks-7.17.4.tgz#45f7e6b0ca7d6ed80c91972f8eaa34358c7792e6"
   integrity sha512-PBcJxDAfGm8k1/JJmaDcxzRVQ3JSE1iXGktbgGz+qEOJmCxwbbAYe+CtGFFgi1xX2bPZ+7dtRr/+XFhnKtt/aw==
 
+"@mantine/modals@^7.17.4":
+  version "7.17.4"
+  resolved "https://registry.yarnpkg.com/@mantine/modals/-/modals-7.17.4.tgz#28354fe51e1eb94d5da25ddb069bd0f2ee82c04e"
+  integrity sha512-KQYzLCQRBs9bq0svdpSda8fgxmqrwEy4tgvoXpmlr02srsyySvpOxhXmAUZsjPZapG+D97sYi7BscVZKZoIqgA==
+
 "@mapbox/node-pre-gyp@^1.0.11":
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.11.tgz#417db42b7f5323d79e93b34a6d7a2a12c0df43fa"

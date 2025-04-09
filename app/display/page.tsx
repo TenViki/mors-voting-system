@@ -1,15 +1,17 @@
-import { validateVoteKey } from "@/actions/votekey";
+import { getVoteKey, validateVoteKey } from "@/actions/votekey";
 import VoteKeyLogin from "@/VoteKeyLogin";
 import React from "react";
 import DisplayVotes from "./DisplayVotes";
 
 const page = async () => {
-  const key = await validateVoteKey(false);
-  if (!key) {
+  const isKeyValid = await validateVoteKey(false);
+  if (!isKeyValid) {
     return <VoteKeyLogin />;
   }
 
-  return <DisplayVotes />;
+  const voteKey = await getVoteKey();
+
+  return <DisplayVotes voteKey={voteKey} />;
 };
 
 export default page;

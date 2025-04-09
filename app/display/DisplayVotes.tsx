@@ -2,14 +2,22 @@
 
 import { getVotes } from "@/actions/vote";
 import { useSocket } from "@/providers/SocketProvider";
-import { Box, Title } from "@mantine/core";
+import { ActionIcon, Group, Stack, Text } from "@mantine/core";
+import { Box, Button, Modal, Title } from "@mantine/core";
 import { Vote } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import { LucideKey } from "lucide-react";
+import React, { FC } from "react";
+import FullscreenButton from "./Fullscreen";
 
-const DisplayVotes = () => {
+interface DisplayVotesProps {
+  voteKey: string;
+}
+
+const DisplayVotes: FC<DisplayVotesProps> = ({ voteKey }) => {
   const socket = useSocket();
   const [votes, setVotes] = React.useState<Vote[]>([]);
+  const [keyOpened, setKeyOpened] = React.useState(false);
 
   const votesQuery = useQuery({
     queryKey: ["votes"],
@@ -22,10 +30,6 @@ const DisplayVotes = () => {
     setVotes(votesQuery.data.votes);
   }, [votesQuery.data]);
 
-  const handleUserVoted = (voted: Vote[]) => {
-    setVotes(voted);
-  };
-
   React.useEffect(() => {
     if (!socket) return;
 
@@ -36,6 +40,14 @@ const DisplayVotes = () => {
     };
   }, [socket]);
 
+  const votesTotal = votes.reduce((acc, vote) => {
+    return acc + vote.votes;
+  }, 0);
+
+  const votesMax = votes.reduce((acc, vote) => {
+    return Math.max(acc, vote.votes);
+  }, 0);
+
   return (
     <Box
       sx={{
@@ -45,13 +57,88 @@ const DisplayVotes = () => {
         padding: 16,
       }}
     >
-      <h1>Votes</h1>
-      {votes.map((vote) => (
-        <div key={vote.id}>
-          <Title order={2}>{vote.name}</Title>
-          <p>{vote.votes} votes</p>
-        </div>
-      ))}
+      <Group justify="flex-end">
+        <Text
+          c="dimmed"
+          sx={{
+            flexGrow: 1,
+          }}
+        >
+          Hlasovací systém MoRS
+        </Text>
+
+        <ActionIcon
+          onClick={() => setKeyOpened(true)}
+          color="#5c0087"
+          size="lg"
+          p={6}
+        >
+          <LucideKey size={"1em"} />
+        </ActionIcon>
+        <FullscreenButton />
+      </Group>
+
+      <Modal
+        opened={keyOpened}
+        onClose={() => setKeyOpened(false)}
+        title="Hlasovací klíč"
+      >
+        <Title
+          ta="center"
+          sx={{
+            fontSize: 48,
+            letterSpacing: 12,
+          }}
+        >
+          {voteKey}
+        </Title>
+
+        <Button
+          color="#5c0087"
+          mt={16}
+          onClick={() => {
+            setKeyOpened(false);
+          }}
+          fullWidth
+        >
+          Zavřít
+        </Button>
+      </Modal>
+
+      <Stack sx={{ flexGrow: 1 }} justify="space-evenly">
+        {votes.map((vote) => (
+          <Group key={vote.id}>
+            <Box
+              sx={{
+                flexBasis: "10%",
+              }}
+            >
+              <Title order={2}>{vote.name}</Title>
+              <Text c="dimmed">{vote.votes} hlasů</Text>
+            </Box>
+
+            <Box
+              sx={{
+                flexGrow: 1,
+                backgroundColor: "#ffffff10",
+                borderRadius: 8,
+                height: 16,
+              }}
+            >
+              <Box
+                sx={{
+                  backgroundColor: "#8700c6",
+                  height: 16,
+                  transition: "width 0.5s",
+                  width:
+                    votesMax == 0 ? "0%" : `${(vote.votes / votesMax) * 100}%`,
+                  borderRadius: 8,
+                }}
+              ></Box>
+            </Box>
+          </Group>
+        ))}
+      </Stack>
     </Box>
   );
 };
