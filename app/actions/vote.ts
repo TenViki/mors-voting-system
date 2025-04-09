@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { getSocketService } from "@/types/socket";
+import { validateAdmin } from "./admin";
 import { getIfVoteOpen, setVoteOpen } from "./settings";
 
 export const getVotes = async () => {
@@ -15,6 +16,8 @@ export const getVotes = async () => {
 };
 
 export const addVote = async (name: string) => {
+  await validateAdmin();
+
   const vote = await prisma.vote.create({
     data: {
       name,
@@ -26,6 +29,7 @@ export const addVote = async (name: string) => {
 };
 
 export const clearVotes = async () => {
+  await validateAdmin();
   await prisma.vote.deleteMany();
   await setVoteOpen(false);
 

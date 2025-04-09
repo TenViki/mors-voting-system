@@ -1,6 +1,7 @@
 "use server";
 
 import { getSocketService } from "@/types/socket";
+import { validateAdmin } from "./admin";
 
 export const getIfVoteOpen = async () => {
   const isVoteOpen = await prisma?.settings.findFirst({
@@ -16,6 +17,8 @@ export const getIfVoteOpen = async () => {
 };
 
 export const setVoteOpen = async (isOpen: boolean) => {
+  await validateAdmin();
+
   const isVoteOpen = await prisma?.settings.findFirst({
     where: {
       name: "isVoteOpen",
