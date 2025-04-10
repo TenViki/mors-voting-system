@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { LucideKey } from "lucide-react";
 import React, { FC } from "react";
 import CurrentQueue from "./CurrentQueue";
+import DisplayVotesTile from "./DisplayVotesTile";
 import FullscreenButton from "./Fullscreen";
 
 interface DisplayVotesProps {
@@ -116,36 +117,42 @@ const DisplayVotes: FC<DisplayVotesProps> = ({ voteKey }) => {
 
       <Stack sx={{ flexGrow: 1 }} justify="space-evenly">
         {votes.map((vote) => (
-          <Group key={vote.id}>
-            <Box
-              sx={{
-                flexBasis: "10%",
-              }}
-            >
-              <Title order={2}>{vote.name}</Title>
-              <Text c="dimmed">{vote.votes} hlasů</Text>
-            </Box>
-
-            <Box
-              sx={{
-                flexGrow: 1,
-                backgroundColor: "#ffffff10",
-                borderRadius: 8,
-                height: 16,
-              }}
-            >
+          <React.Fragment key={vote.id}>
+            {/* <Group>
               <Box
                 sx={{
-                  backgroundColor: "#8700c6",
-                  height: 16,
-                  transition: "width 0.5s",
-                  width:
-                    votesMax == 0 ? "0%" : `${(vote.votes / votesMax) * 100}%`,
-                  borderRadius: 8,
+                  flexBasis: "10%",
                 }}
-              ></Box>
-            </Box>
-          </Group>
+              >
+                <Title order={2}>{vote.name}</Title>
+                <Text c="dimmed">{vote.votes} hlasů</Text>
+              </Box>
+
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  backgroundColor: "#ffffff10",
+                  borderRadius: 8,
+                  height: 16,
+                }}
+              >
+                <Box
+                  sx={{
+                    backgroundColor: "#8700c6",
+                    height: 16,
+                    transition: "width 0.5s",
+                    width:
+                      votesMax == 0
+                        ? "0%"
+                        : `${(vote.votes / votesMax) * 100}%`,
+                    borderRadius: 8,
+                  }}
+                ></Box>
+              </Box>
+            </Group> */}
+
+            <DisplayVotesTile vote={vote} maxVotes={votesMax} />
+          </React.Fragment>
         ))}
       </Stack>
 

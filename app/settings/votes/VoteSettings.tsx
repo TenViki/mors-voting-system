@@ -38,7 +38,7 @@ const VoteSettings = () => {
       <Group mb={16}>
         <Select
           value={null}
-          placeholder="Apply template"
+          placeholder="Použít šablonu"
           data={voteTemplates.map((template) => ({
             value: template.name,
             label: template.name,
@@ -56,7 +56,7 @@ const VoteSettings = () => {
         <AddVoteForm />
 
         <Text c="dimmed">
-          {voteQuery.data?.open ? "Voting is open" : "Voting is closed"}
+          {voteQuery.data?.open ? "Hlasování otevřeno" : "Hlasování uzavřeno"}
         </Text>
       </Group>
 
@@ -67,7 +67,7 @@ const VoteSettings = () => {
           ))}
         </Stack>
       ) : (
-        <p>No votes available.</p>
+        <Text c="dimmed">Nejsou nastaveny žádné hlasy</Text>
       )}
 
       <Group mt={16}>
@@ -77,14 +77,14 @@ const VoteSettings = () => {
 
         {voteQuery.data?.open ? (
           <Button color="red" onClick={() => changeStateMutation.mutate(false)}>
-            Close voting
+            Zavřít hlasování
           </Button>
         ) : (
           <Button
             color="green"
             onClick={() => changeStateMutation.mutate(true)}
           >
-            Open voting
+            Otevřít hlasování
           </Button>
         )}
       </Group>

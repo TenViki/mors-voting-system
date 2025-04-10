@@ -179,7 +179,7 @@ const VotePage = () => {
       >
         {!userVoted && voteOpened ? (
           <Stack sx={{ flexGrow: 1 }} px={8} gap={8}>
-            {votes ? (
+            {votes && votes.length ? (
               votes.map((vote) => (
                 <VoteButton
                   key={vote.id}
@@ -209,7 +209,17 @@ const VotePage = () => {
                 </VoteButton>
               ))
             ) : (
-              <p>No votes available.</p>
+              <Text
+                c="dimmed"
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flexGrow: 1,
+                }}
+              >
+                Nebyly nastaveny žádné možnosti.
+              </Text>
             )}
           </Stack>
         ) : userVoted ? (
