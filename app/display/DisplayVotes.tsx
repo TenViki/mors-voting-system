@@ -3,23 +3,16 @@
 import ColorSchemeSwitch from "&/shared/ColorSchemeSwitch";
 import { getVotes } from "@/actions/vote";
 import { useSocket } from "@/providers/SocketProvider";
-import {
-  ActionIcon,
-  Box,
-  Button,
-  Group,
-  Modal,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { voteTemplates } from "@/types/templates";
+import { ActionIcon, Box, Flex, Group, Text } from "@mantine/core";
 import { Vote } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { LucideKey } from "lucide-react";
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 import CurrentQueue from "./CurrentQueue";
 import DisplayVotesTile from "./DisplayVotesTile";
 import FullscreenButton from "./Fullscreen";
+import KeyModal from "./KeyModal";
 
 interface DisplayVotesProps {
   voteKey: string;
@@ -45,9 +38,11 @@ const DisplayVotes: FC<DisplayVotesProps> = ({ voteKey }) => {
     if (!socket) return;
 
     socket.on("votes:update", setVotes);
+    socket.on("votes:add", (vote) => setVotes((prev) => [...prev, vote]));
 
     return () => {
       socket.off("votes:update", setVotes);
+      socket.off("votes:add");
     };
   }, [socket]);
 
@@ -58,6 +53,16 @@ const DisplayVotes: FC<DisplayVotesProps> = ({ voteKey }) => {
   const votesMax = votes.reduce((acc, vote) => {
     return Math.max(acc, vote.votes);
   }, 0);
+
+  const isTemplate = useMemo(
+    () =>
+      voteTemplates.some(
+        (template) =>
+          template.values.length === votes.length &&
+          template.values.every((value, index) => value === votes[index].name)
+      ),
+    [votes]
+  );
 
   return (
     <Box
@@ -91,73 +96,22 @@ const DisplayVotes: FC<DisplayVotesProps> = ({ voteKey }) => {
         <FullscreenButton />
       </Group>
 
-      <Modal
+      <KeyModal
+        voteKey={voteKey}
         opened={keyOpened}
         onClose={() => setKeyOpened(false)}
-        title="Hlasovací klíč"
-      >
-        <Title
-          ta="center"
-          sx={{
-            fontSize: 48,
-            letterSpacing: 12,
-          }}
-        >
-          {voteKey}
-        </Title>
+      />
 
-        <Button
-          color="#5c0087"
-          mt={16}
-          onClick={() => {
-            setKeyOpened(false);
-          }}
-          fullWidth
-        >
-          Zavřít
-        </Button>
-      </Modal>
-
-      <Stack sx={{ flexGrow: 1 }} justify="space-evenly">
+      <Flex sx={{ flexGrow: 1, flexDirection: "column" }} mb={16}>
         {votes.map((vote) => (
-          <React.Fragment key={vote.id}>
-            {/* <Group>
-              <Box
-                sx={{
-                  flexBasis: "10%",
-                }}
-              >
-                <Title order={2}>{vote.name}</Title>
-                <Text c="dimmed">{vote.votes} hlasů</Text>
-              </Box>
-
-              <Box
-                sx={{
-                  flexGrow: 1,
-                  backgroundColor: "#ffffff10",
-                  borderRadius: 8,
-                  height: 16,
-                }}
-              >
-                <Box
-                  sx={{
-                    backgroundColor: "#8700c6",
-                    height: 16,
-                    transition: "width 0.5s",
-                    width:
-                      votesMax == 0
-                        ? "0%"
-                        : `${(vote.votes / votesMax) * 100}%`,
-                    borderRadius: 8,
-                  }}
-                ></Box>
-              </Box>
-            </Group> */}
-
-            <DisplayVotesTile vote={vote} maxVotes={votesMax} />
-          </React.Fragment>
+          <DisplayVotesTile
+            vote={vote}
+            maxVotes={votesMax}
+            key={vote.id}
+            isCompact={isTemplate}
+          />
         ))}
-      </Stack>
+      </Flex>
 
       <CurrentQueue />
     </Box>

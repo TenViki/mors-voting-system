@@ -1,11 +1,13 @@
 "use client";
 
 import useSearchParamsState from "@/lib/useSearchParamState";
-import { Tabs, TabsList, TabsPanel, Title } from "@mantine/core";
+import { Button, Group, Tabs, TabsList, TabsPanel, Title } from "@mantine/core";
 import {
+  LucideEye,
   LucideKey,
   LucideList,
   LucideListStart,
+  LucidePresentation,
   LucideUsers,
 } from "lucide-react";
 import QueuePage from "./queue/QueuePage";
@@ -18,7 +20,33 @@ const SettingsPage = () => {
 
   return (
     <>
-      <Title mb={16}>Nastavení</Title>
+      <Group justify="space-between" align="center" mb={16}>
+        <Title>Nastavení</Title>
+
+        <Button
+          leftSection={<LucideEye size={16} />}
+          rightSection={<LucidePresentation size={16} />}
+          // href={"/display"}
+          // component={Link}
+          // target="_blank"
+          onClick={() => {
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+
+            window.open(
+              "/display",
+              "myWindow",
+              `width=${screenWidth - 100},height=${
+                screenHeight - 100
+              },top=50,left=50`
+            );
+          }}
+          variant="light"
+          color="gray"
+        >
+          Prezentační zobrazení
+        </Button>
+      </Group>
       <Tabs
         value={tab}
         onChange={(value) => {

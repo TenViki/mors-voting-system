@@ -2,13 +2,20 @@
 
 import { Box, PinInput, Text, Title } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
-import React from "react";
+import { useEffect } from "react";
 import { loginVoteKey } from "./actions/votekey";
 
 const VoteKeyLogin = () => {
   const loginMutation = useMutation({
     mutationFn: loginVoteKey,
   });
+
+  useEffect(() => {
+    const sParamKey = new URLSearchParams(window.location.search).get("key");
+    if (sParamKey) {
+      loginMutation.mutate(sParamKey);
+    }
+  }, []);
 
   return (
     <Box
@@ -26,7 +33,7 @@ const VoteKeyLogin = () => {
       <PinInput
         length={6}
         autoFocus
-        size="xl"
+        size="lg"
         type="number"
         mt={16}
         sx={{
