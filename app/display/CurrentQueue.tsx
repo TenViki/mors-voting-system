@@ -1,9 +1,10 @@
 import { useQueue } from "@/lib/queue";
-import { Box, Group, Paper, Text } from "@mantine/core";
+import { Box, lighten, Paper, useMantineColorScheme } from "@mantine/core";
 import { QueuePosition, User } from "@prisma/client";
 import styles from "./queue.module.css";
+import QueueTile from "./QueueTile";
 
-type QueuePos = QueuePosition & {
+export type QueuePos = QueuePosition & {
   user: User;
 };
 
@@ -11,6 +12,10 @@ const CurrentQueue = () => {
   const { queue } = useQueue();
 
   const firstThree = queue.slice(0, 3);
+  const theme = useMantineColorScheme();
+
+  const textColor =
+    theme.colorScheme === "dark" ? lighten("#5c0087", 0.6) : "#5c0087";
 
   return (
     <Box
@@ -25,42 +30,7 @@ const CurrentQueue = () => {
       }}
     >
       {firstThree.map((qp, i) => (
-        <Paper
-          py={16}
-          px={32}
-          key={qp.id}
-          className={styles.queueItem}
-          sx={{
-            backgroundColor: i == 0 ? "#5c0087" : "#5c008722",
-            color: i == 0 ? "white" : "black",
-            display: "flex",
-            height: "9rem",
-            flexDirection: "column",
-          }}
-        >
-          <Box
-            sx={{
-              fontSize: "2rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexGrow: 1,
-            }}
-            fw={700}
-          >
-            {qp.user.name}
-          </Box>
-
-          <Group justify="space-between">
-            {i == 0 && qp.isActive ? (
-              <Text>Aktuální řečník</Text>
-            ) : (
-              <Text c="#5c0087">Ve frontě</Text>
-            )}
-
-            <Text>{new Date(qp.createdAt).toLocaleTimeString("cs-CZ")}</Text>
-          </Group>
-        </Paper>
+        <QueueTile key={qp.id} pos={qp} index={i} />
       ))}
 
       {queue.length > 3 && (
@@ -70,7 +40,6 @@ const CurrentQueue = () => {
           className={styles.queueItem}
           sx={{
             backgroundColor: "#5c008722",
-            color: "black",
             display: "flex",
             height: "9rem",
             flexDirection: "column",
@@ -83,7 +52,7 @@ const CurrentQueue = () => {
               alignItems: "center",
               justifyContent: "center",
               flexGrow: 1,
-              color: "#5c0087",
+              color: textColor,
             }}
             fw={700}
           >

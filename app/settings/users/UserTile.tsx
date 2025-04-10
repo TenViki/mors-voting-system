@@ -1,7 +1,15 @@
+import { kickUser } from "@/actions/users";
 import { SPECIAL_VOTES } from "@/vote/VotePage";
-import { Box, ColorSwatch, Group, Paper, Text, ThemeIcon } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  ColorSwatch,
+  Group,
+  Paper,
+  Text,
+} from "@mantine/core";
 import { User, Vote } from "@prisma/client";
-import { LucideCheck } from "lucide-react";
+import { LucideCheck, LucideLogOut } from "lucide-react";
 import { FC } from "react";
 
 interface UserTileProps {
@@ -31,11 +39,20 @@ const UserTile: FC<UserTileProps> = ({ user }) => {
 
         <Box>
           {user.socketId ? (
-            <ColorSwatch color="green" size={12} />
+            <ColorSwatch color="var(--mantine-color-green-6)" size={12} />
           ) : (
             <ColorSwatch color="grey" size={12} />
           )}
         </Box>
+
+        <ActionIcon
+          onClick={() => kickUser(user.id)}
+          color="red"
+          variant="subtle"
+          disabled={!user.socketId}
+        >
+          <LucideLogOut size={16} />
+        </ActionIcon>
       </Group>
     </Paper>
   );

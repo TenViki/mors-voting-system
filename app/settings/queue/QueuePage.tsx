@@ -132,7 +132,6 @@ const QueuePage = () => {
             px={12}
             radius={8}
             sx={{
-              backgroundColor: "white",
               background: i == 0 ? "#5c0087" : undefined,
               color: i == 0 ? "white" : undefined,
               // height: "fit-content",

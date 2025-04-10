@@ -1,5 +1,6 @@
 "use client";
 
+import ColorSchemeSwitch from "&/shared/ColorSchemeSwitch";
 import { getVotes } from "@/actions/vote";
 import { useSocket } from "@/providers/SocketProvider";
 import {
@@ -85,6 +86,8 @@ const DisplayVotes: FC<DisplayVotesProps> = ({ voteKey }) => {
         >
           <LucideKey size={"1em"} />
         </ActionIcon>
+
+        <ColorSchemeSwitch />
         <FullscreenButton />
       </Group>
 

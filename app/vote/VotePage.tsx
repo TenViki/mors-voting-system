@@ -120,6 +120,7 @@ const VotePage = () => {
       const hasVoted = queue.find((pos) => pos.id === currentQueueId);
       setQueueStatus(hasVoted ? "active" : "inactive");
     });
+    socket.on("user:kick", () => userLogout());
 
     return () => {
       socket.off("votes:add");
@@ -128,6 +129,7 @@ const VotePage = () => {
       socket.off("votes:template");
       socket.off("user:vote", handleUserVoted);
       socket.off("connect", handleConnect);
+      socket.off("user:kick");
 
       socket.off("queue:join");
       socket.off("queue:leave");

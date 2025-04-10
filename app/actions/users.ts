@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { getSocketService } from "@/types/socket";
 import { validateAdmin } from "./admin";
 
 export const getUsers = async () => {
@@ -32,5 +33,23 @@ export const resetUsers = async () => {
   await validateAdmin();
 
   const data = await prisma.user.deleteMany();
+  return data;
+};
+
+export const kickUser = async (userId: string) => {
+  await validateAdmin();
+
+  const data = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      socketId: null,
+    },
+  });
+
+  getSocketService().broadcastToAll("user:logoff", data);
+  getSocketService().broadcastToRoom(userId, "user:kick");
+
   return data;
 };
