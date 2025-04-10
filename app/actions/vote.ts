@@ -81,6 +81,6 @@ export const didVote = async () => {
 
   return {
     vote: !!user.currentVoteId,
-    queue: !!q,
+    queue: q?.id,
   };
 };

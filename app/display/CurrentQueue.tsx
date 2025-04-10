@@ -1,9 +1,6 @@
-import { getQueue } from "@/actions/queue";
-import { useSocket } from "@/providers/SocketProvider";
+import { useQueue } from "@/lib/queue";
 import { Box, Group, Paper, Text } from "@mantine/core";
 import { QueuePosition, User } from "@prisma/client";
-import { useQuery } from "@tanstack/react-query";
-import React, { useEffect } from "react";
 import styles from "./queue.module.css";
 
 type QueuePos = QueuePosition & {
@@ -11,40 +8,14 @@ type QueuePos = QueuePosition & {
 };
 
 const CurrentQueue = () => {
-  const socket = useSocket();
-  const [queuePositions, setQueuePositions] = React.useState<QueuePos[]>([]);
+  const { queue } = useQueue();
 
-  const handleQueueUpdate = (queuePositions: QueuePos[]) => {
-    setQueuePositions(queuePositions);
-  };
-
-  const queueQuery = useQuery({
-    queryKey: ["queue"],
-    queryFn: () => getQueue(),
-  });
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("queue:update", handleQueueUpdate);
-
-    return () => {
-      socket.off("queue:update", handleQueueUpdate);
-    };
-  }, [socket]);
-
-  useEffect(() => {
-    if (!queueQuery.data) return;
-
-    setQueuePositions(queueQuery.data);
-  }, [queueQuery.data]);
-
-  const firstThree = queuePositions.slice(0, 3);
+  const firstThree = queue.slice(0, 3);
 
   return (
     <Box
       sx={{
-        height: queuePositions.length > 0 ? "9rem" : "0",
+        height: queue.length > 0 ? "9rem" : "0",
         overflowY: "hidden",
         transition: "height 0.5s",
         gap: 16,
@@ -92,7 +63,7 @@ const CurrentQueue = () => {
         </Paper>
       ))}
 
-      {queuePositions.length > 3 && (
+      {queue.length > 3 && (
         <Paper
           py={16}
           px={32}
@@ -116,10 +87,10 @@ const CurrentQueue = () => {
             }}
             fw={700}
           >
-            +{queuePositions.length - 3}{" "}
-            {queuePositions.length - 3 == 1
+            +{queue.length - 3}{" "}
+            {queue.length - 3 == 1
               ? "další"
-              : queuePositions.length - 3 < 5
+              : queue.length - 3 < 5
               ? "další"
               : "dalších"}
           </Box>

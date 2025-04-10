@@ -4,8 +4,9 @@ import { userLogout } from "@/actions/auth";
 import { toggleQueue } from "@/actions/queue";
 import { didVote, getVotes } from "@/actions/vote";
 import { registerVote } from "@/actions/voting";
+import { useQueue } from "@/lib/queue";
 import { useSocket } from "@/providers/SocketProvider";
-import { Anchor, Box, Button, Group, Stack } from "@mantine/core";
+import { Anchor, Box, Button, Group, Stack, Text } from "@mantine/core";
 import { Vote } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { LucideCheck, LucideCircle, LucideX } from "lucide-react";
@@ -32,12 +33,17 @@ export const SPECIAL_VOTES: Record<
 
 const VotePage = () => {
   const socket = useSocket();
+  const { queue } = useQueue();
+
   const [votes, setVotes] = React.useState<Vote[] | null>(null);
   const [voteOpened, setVoteOpened] = React.useState(false);
   const [userVoted, setUserVoted] = React.useState(false);
   const [queueStatus, setQueueStatus] = React.useState<
     "active" | "inactive" | "disabled" | null
   >(null);
+  const [currentQueueId, setCurrentQueueId] = React.useState<string | null>(
+    null
+  );
 
   const votesQuery = useQuery({
     queryKey: ["votes"],
@@ -65,6 +71,7 @@ const VotePage = () => {
 
     setUserVoted(userVotedQuery.data.vote);
     setQueueStatus(userVotedQuery.data.queue ? "active" : "inactive");
+    userVotedQuery.data.queue && setCurrentQueueId(userVotedQuery.data.queue);
   }, [userVotedQuery.data]);
 
   useEffect(() => {
@@ -92,8 +99,14 @@ const VotePage = () => {
     socket.on("user:vote", handleUserVoted);
     socket.on("connect", handleConnect);
 
-    socket.on("queue:join", () => setQueueStatus("active"));
-    socket.on("queue:leave", () => setQueueStatus("inactive"));
+    socket.on("queue:join", (id: string) => {
+      setQueueStatus("active");
+      setCurrentQueueId(id);
+    });
+    socket.on("queue:leave", () => {
+      setQueueStatus("inactive");
+      setCurrentQueueId(null);
+    });
     socket.on("queue:disabled", () => setQueueStatus("disabled"));
 
     return () => {
@@ -121,6 +134,8 @@ const VotePage = () => {
     await toggleQueue();
   };
 
+  const position = queue.findIndex((pos) => pos.id === currentQueueId);
+
   return (
     <>
       <Group justify="space-between" px={8} py={8}>
@@ -136,13 +151,19 @@ const VotePage = () => {
             : "Fronta je vypnutá"}
         </Button>
 
+        {position === 0 && <Text>Jste aktuální řečník</Text>}
+        {position > 0 && <Text c="dimmed">Jste {position + 1}. ve frontě</Text>}
+
         <Anchor c="#5c0087" onClick={() => userLogout()}>
           Odhlásit se
         </Anchor>
       </Group>
-      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+      <Box
+        sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
+        mb={16}
+      >
         {!userVoted && voteOpened ? (
-          <Stack sx={{ flexGrow: 1 }} px={16}>
+          <Stack sx={{ flexGrow: 1 }} px={8} gap={8}>
             {votes ? (
               votes.map((vote) => (
                 <VoteButton
@@ -152,7 +173,7 @@ const VotePage = () => {
                   }}
                   size="xl"
                   color={SPECIAL_VOTES[vote.name]?.color}
-                  sx={{ marginBottom: 8, flexGrow: 1 }}
+                  sx={{ flexGrow: 1 }}
                 >
                   <Box>
                     {SPECIAL_VOTES[vote.name]?.icon && (
