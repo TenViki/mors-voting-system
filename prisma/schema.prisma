@@ -24,9 +24,19 @@ model Settings {
 }
 
 model User {
-  id            String  @id @default(cuid())
+  id            String          @id @default(cuid())
   name          String
   socketId      String?
-  currentVote   Vote?   @relation(fields: [currentVoteId], references: [id])
+  currentVote   Vote?           @relation(fields: [currentVoteId], references: [id])
   currentVoteId String?
+  queuePosition QueuePosition[]
+}
+
+model QueuePosition {
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+  isActive  Boolean  @default(true)
+
+  user User @relation(fields: [userId], references: [id])
 }

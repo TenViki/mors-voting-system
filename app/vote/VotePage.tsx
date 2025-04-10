@@ -1,15 +1,16 @@
 "use client";
 
 import { userLogout } from "@/actions/auth";
+import { toggleQueue } from "@/actions/queue";
 import { didVote, getVotes } from "@/actions/vote";
+import { registerVote } from "@/actions/voting";
 import { useSocket } from "@/providers/SocketProvider";
-import { Anchor, Box, Group, Stack, Text } from "@mantine/core";
+import { Anchor, Box, Button, Group, Stack } from "@mantine/core";
 import { Vote } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { LucideCheck, LucideCircle, LucideX } from "lucide-react";
 import React, { useEffect } from "react";
 import VoteButton from "./VoteButton";
-import { registerVote } from "@/actions/voting";
 
 export const SPECIAL_VOTES: Record<
   string,
@@ -34,6 +35,9 @@ const VotePage = () => {
   const [votes, setVotes] = React.useState<Vote[] | null>(null);
   const [voteOpened, setVoteOpened] = React.useState(false);
   const [userVoted, setUserVoted] = React.useState(false);
+  const [queueStatus, setQueueStatus] = React.useState<
+    "active" | "inactive" | "disabled" | null
+  >(null);
 
   const votesQuery = useQuery({
     queryKey: ["votes"],
@@ -59,7 +63,8 @@ const VotePage = () => {
   useEffect(() => {
     if (userVotedQuery.data == undefined) return;
 
-    setUserVoted(userVotedQuery.data);
+    setUserVoted(userVotedQuery.data.vote);
+    setQueueStatus(userVotedQuery.data.queue ? "active" : "inactive");
   }, [userVotedQuery.data]);
 
   useEffect(() => {
@@ -85,8 +90,11 @@ const VotePage = () => {
     });
 
     socket.on("user:vote", handleUserVoted);
-
     socket.on("connect", handleConnect);
+
+    socket.on("queue:join", () => setQueueStatus("active"));
+    socket.on("queue:leave", () => setQueueStatus("inactive"));
+    socket.on("queue:disabled", () => setQueueStatus("disabled"));
 
     return () => {
       socket.off("votes:add");
@@ -95,6 +103,10 @@ const VotePage = () => {
       socket.off("votes:template");
       socket.off("user:vote", handleUserVoted);
       socket.off("connect", handleConnect);
+
+      socket.off("queue:join");
+      socket.off("queue:leave");
+      socket.off("queue:disabled");
     };
   }, [socket]);
 
@@ -105,12 +117,28 @@ const VotePage = () => {
     }
   }, [votesQuery.data]);
 
+  const handleRequestQueue = async () => {
+    await toggleQueue();
+  };
+
   return (
     <>
-      <Group justify="space-between" px={16} py={8}>
-        <Text>Hlasování</Text>
+      <Group justify="space-between" px={8} py={8}>
+        <Button
+          color={queueStatus === "inactive" ? "#5c0087" : "red"}
+          onClick={handleRequestQueue}
+          disabled={queueStatus === "disabled"}
+        >
+          {queueStatus === "inactive"
+            ? "Požádat o slovo"
+            : queueStatus === "active"
+            ? "Zrušit žádost"
+            : "Fronta je vypnutá"}
+        </Button>
 
-        <Anchor onClick={() => userLogout()}>Odhlásit se</Anchor>
+        <Anchor c="#5c0087" onClick={() => userLogout()}>
+          Odhlásit se
+        </Anchor>
       </Group>
       <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
         {!userVoted && voteOpened ? (

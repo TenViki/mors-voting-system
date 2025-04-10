@@ -1,11 +1,11 @@
 "use server";
 
+import prisma from "@/lib/prisma";
 import { getSocketService } from "@/types/socket";
 import { voteTemplates } from "@/types/templates";
 import { validateAdmin } from "./admin";
-import { getIfVoteOpen, setVoteOpen } from "./settings";
 import { validateUser } from "./auth";
-import prisma from "@/lib/prisma";
+import { getIfVoteOpen, setVoteOpen } from "./settings";
 
 export const getVotes = async () => {
   const votes = await prisma.vote.findMany({
@@ -73,5 +73,14 @@ export const didVote = async () => {
   const user = await validateUser();
   if (!user) throw new Error("Not authenticated");
 
-  return !!user.currentVoteId;
+  const q = await prisma.queuePosition.findFirst({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  return {
+    vote: !!user.currentVoteId,
+    queue: !!q,
+  };
 };

@@ -2,12 +2,21 @@
 
 import { getVotes } from "@/actions/vote";
 import { useSocket } from "@/providers/SocketProvider";
-import { ActionIcon, Group, Stack, Text } from "@mantine/core";
-import { Box, Button, Modal, Title } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Group,
+  Modal,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { Vote } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { LucideKey } from "lucide-react";
 import React, { FC } from "react";
+import CurrentQueue from "./CurrentQueue";
 import FullscreenButton from "./Fullscreen";
 
 interface DisplayVotesProps {
@@ -139,6 +148,8 @@ const DisplayVotes: FC<DisplayVotesProps> = ({ voteKey }) => {
           </Group>
         ))}
       </Stack>
+
+      <CurrentQueue />
     </Box>
   );
 };
