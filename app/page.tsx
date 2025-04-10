@@ -24,5 +24,5 @@ export default async function Home() {
     return <UserLogin />;
   }
 
-  return <VotePage />;
+  return <VotePage userId={user.id} />;
 }

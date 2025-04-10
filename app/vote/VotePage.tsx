@@ -1,16 +1,24 @@
 "use client";
 
+import ColorSchemeSwitch from "&/shared/ColorSchemeSwitch";
 import { userLogout } from "@/actions/auth";
 import { toggleQueue } from "@/actions/queue";
 import { didVote, getVotes } from "@/actions/vote";
 import { registerVote } from "@/actions/voting";
 import { useQueue } from "@/lib/queue";
 import { useSocket } from "@/providers/SocketProvider";
-import { Anchor, Box, Button, Group, Stack, Text } from "@mantine/core";
+import { ActionIcon, Box, Button, Group, Stack, Text } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import { Vote } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import { LucideCheck, LucideCircle, LucideLock, LucideX } from "lucide-react";
-import React, { useEffect } from "react";
+import {
+  LucideCheck,
+  LucideCircle,
+  LucideLock,
+  LucideLogOut,
+  LucideX,
+} from "lucide-react";
+import React, { FC, useEffect } from "react";
 import VoteButton from "./VoteButton";
 
 export const SPECIAL_VOTES: Record<
@@ -39,7 +47,11 @@ export const SPECIAL_VOTES: Record<
   },
 };
 
-const VotePage = () => {
+interface VotePageProps {
+  userId: string;
+}
+
+const VotePage: FC<VotePageProps> = ({ userId }) => {
   const socket = useSocket();
   const { queue, state } = useQueue();
 
@@ -54,14 +66,14 @@ const VotePage = () => {
   );
 
   const votesQuery = useQuery({
-    queryKey: ["votes"],
+    queryKey: ["votes", userId],
     queryFn: () => getVotes(),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
 
   const userVotedQuery = useQuery({
-    queryKey: ["userVoted"],
+    queryKey: ["userVoted", userId],
     queryFn: () => didVote(),
   });
 
@@ -159,6 +171,22 @@ const VotePage = () => {
 
   const position = queue.findIndex((pos) => pos.id === currentQueueId);
 
+  const handleLogout = () => {
+    modals.openConfirmModal({
+      title: "Odhlásit se",
+      children: (
+        <Text size="sm">
+          Opravdu se chcete odhlásit? Ztratíte všechny neuložené změny.
+        </Text>
+      ),
+      labels: { confirm: "Odhlásit se", cancel: "Zrušit" },
+      onCancel: () => {},
+      onConfirm: () => {
+        userLogout();
+      },
+    });
+  };
+
   return (
     <>
       <Group justify="space-between" px={8} py={8}>
@@ -179,9 +207,18 @@ const VotePage = () => {
         {position === 0 && <Text>Máte slovo!</Text>}
         {position > 0 && <Text c="dimmed">Jste {position + 1}. ve frontě</Text>}
 
-        <Anchor c="#5c0087" onClick={() => userLogout()}>
-          Odhlásit se
-        </Anchor>
+        <Group gap={8}>
+          <ColorSchemeSwitch />
+          <ActionIcon
+            variant="light"
+            p={6}
+            color="red"
+            onClick={() => handleLogout()}
+            size="lg"
+          >
+            <LucideLogOut size={16} />
+          </ActionIcon>
+        </Group>
       </Group>
       <Box
         sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}

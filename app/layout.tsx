@@ -43,7 +43,10 @@ export default async function RootLayout({
       >
         <RootStyleRegistry>
           <MantineEmotionProvider>
-            <MantineProvider stylesTransform={emotionTransform}>
+            <MantineProvider
+              stylesTransform={emotionTransform}
+              defaultColorScheme="auto"
+            >
               <QueryClientContext>
                 <ModalsProvider
                   labels={{
