@@ -25,6 +25,14 @@ export const SPECIAL_VOTES: Record<
     color: "red",
     icon: <LucideX size={"1em"} />,
   },
+  Pro: {
+    color: "green",
+    icon: <LucideCheck size={"1em"} />,
+  },
+  Proti: {
+    color: "red",
+    icon: <LucideX size={"1em"} />,
+  },
   "Zdržel se": {
     color: "yellow",
     icon: <LucideCircle size={"1em"} />,

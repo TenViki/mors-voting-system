@@ -1,5 +1,5 @@
 import { SPECIAL_VOTES } from "@/vote/VotePage";
-import { Box, Group, Title, useMantineTheme } from "@mantine/core";
+import { Box, Flex, Group, Title, useMantineTheme } from "@mantine/core";
 import { Vote } from "@prisma/client";
 import { FC } from "react";
 
@@ -18,21 +18,20 @@ const DisplayVotesTile: FC<DisplayVotesTileProps> = ({ vote, maxVotes }) => {
 
   return (
     <Box>
-      <Group>
+      <Group mr={32}>
         <Box
           sx={{
             flexBasis: "10rem",
           }}
         >
-          <Title ta="right">{vote.name}</Title>
+          <Title ta="center">{vote.name}</Title>
         </Box>
-
         <Box
           sx={{
             flexGrow: 1,
           }}
         >
-          <Group
+          <Flex
             justify="space-between"
             p={16}
             pr={24}
@@ -43,7 +42,7 @@ const DisplayVotesTile: FC<DisplayVotesTileProps> = ({ vote, maxVotes }) => {
               transition: "width 0.5s, background-color 0.5s",
               borderRadius: 8,
               width: maxVotes == 0 ? "0%" : `${(vote.votes / maxVotes) * 100}%`,
-              minWidth: 150,
+              minWidth: icon ? 150 : 68,
             }}
           >
             {icon ? (
@@ -68,7 +67,7 @@ const DisplayVotesTile: FC<DisplayVotesTileProps> = ({ vote, maxVotes }) => {
             >
               {vote.votes}
             </Title>
-          </Group>
+          </Flex>
         </Box>
       </Group>
     </Box>
