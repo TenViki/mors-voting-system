@@ -166,7 +166,7 @@ const VotePage = () => {
           )}
         </Button>
 
-        {position === 0 && <Text>Jste aktuální řečník</Text>}
+        {position === 0 && <Text>Máte slovo!</Text>}
         {position > 0 && <Text c="dimmed">Jste {position + 1}. ve frontě</Text>}
 
         <Anchor c="#5c0087" onClick={() => userLogout()}>

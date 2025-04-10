@@ -37,9 +37,10 @@ const DisplayVotesTile: FC<DisplayVotesTileProps> = ({ vote, maxVotes }) => {
             p={16}
             pr={24}
             sx={{
-              backgroundColor: resolvedColor,
+              backgroundColor:
+                vote.votes == 0 ? resolvedColor + "33" : resolvedColor,
               flexWrap: "nowrap",
-              transition: "width 0.5s",
+              transition: "width 0.5s, background-color 0.5s",
               borderRadius: 8,
               width: maxVotes == 0 ? "0%" : `${(vote.votes / maxVotes) * 100}%`,
               minWidth: 150,
@@ -48,8 +49,9 @@ const DisplayVotesTile: FC<DisplayVotesTileProps> = ({ vote, maxVotes }) => {
             {icon ? (
               <Box
                 sx={{
-                  color: "white",
                   fontSize: 48,
+                  color: vote.votes == 0 ? resolvedColor : "white",
+                  transition: "color 0.5s",
                 }}
               >
                 {icon}
@@ -58,7 +60,14 @@ const DisplayVotesTile: FC<DisplayVotesTileProps> = ({ vote, maxVotes }) => {
               <div></div>
             )}
 
-            <Title c="white">{vote.votes}</Title>
+            <Title
+              sx={{
+                transition: "color 0.5s",
+                color: vote.votes == 0 ? resolvedColor : "white",
+              }}
+            >
+              {vote.votes}
+            </Title>
           </Group>
         </Box>
       </Group>
