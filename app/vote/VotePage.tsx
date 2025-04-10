@@ -9,7 +9,7 @@ import { useSocket } from "@/providers/SocketProvider";
 import { Anchor, Box, Button, Group, Stack, Text } from "@mantine/core";
 import { Vote } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import { LucideCheck, LucideCircle, LucideX } from "lucide-react";
+import { LucideCheck, LucideCircle, LucideLock, LucideX } from "lucide-react";
 import React, { useEffect } from "react";
 import VoteButton from "./VoteButton";
 
@@ -33,7 +33,7 @@ export const SPECIAL_VOTES: Record<
 
 const VotePage = () => {
   const socket = useSocket();
-  const { queue } = useQueue();
+  const { queue, state } = useQueue();
 
   const [votes, setVotes] = React.useState<Vote[] | null>(null);
   const [voteOpened, setVoteOpened] = React.useState(false);
@@ -70,9 +70,9 @@ const VotePage = () => {
     if (userVotedQuery.data == undefined) return;
 
     setUserVoted(userVotedQuery.data.vote);
-    setQueueStatus(userVotedQuery.data.queue ? "active" : "inactive");
+    state && setQueueStatus(userVotedQuery.data.queue ? "active" : "inactive");
     userVotedQuery.data.queue && setCurrentQueueId(userVotedQuery.data.queue);
-  }, [userVotedQuery.data]);
+  }, [userVotedQuery.data, state]);
 
   useEffect(() => {
     if (!socket) return;
@@ -104,10 +104,14 @@ const VotePage = () => {
       setCurrentQueueId(id);
     });
     socket.on("queue:leave", () => {
-      setQueueStatus("inactive");
+      queueStatus !== "disabled" && setQueueStatus("inactive");
       setCurrentQueueId(null);
     });
     socket.on("queue:disabled", () => setQueueStatus("disabled"));
+    socket.on("queue:enabled", () => {
+      const hasVoted = queue.find((pos) => pos.id === currentQueueId);
+      setQueueStatus(hasVoted ? "active" : "inactive");
+    });
 
     return () => {
       socket.off("votes:add");
@@ -120,8 +124,9 @@ const VotePage = () => {
       socket.off("queue:join");
       socket.off("queue:leave");
       socket.off("queue:disabled");
+      socket.off("queue:enabled");
     };
-  }, [socket]);
+  }, [socket, currentQueueId, queue, queueStatus]);
 
   useEffect(() => {
     if (votesQuery.data) {
@@ -129,6 +134,14 @@ const VotePage = () => {
       setVoteOpened(votesQuery.data.open);
     }
   }, [votesQuery.data]);
+
+  useEffect(() => {
+    console.log("State", state);
+    if (!state) {
+      console.log("Setting disabled");
+      setQueueStatus("disabled");
+    }
+  }, [state]);
 
   const handleRequestQueue = async () => {
     await toggleQueue();
@@ -144,11 +157,13 @@ const VotePage = () => {
           onClick={handleRequestQueue}
           disabled={queueStatus === "disabled"}
         >
-          {queueStatus === "inactive"
-            ? "Požádat o slovo"
-            : queueStatus === "active"
-            ? "Zrušit žádost"
-            : "Fronta je vypnutá"}
+          {queueStatus === "inactive" ? (
+            "Požádat o slovo"
+          ) : queueStatus === "active" ? (
+            "Zrušit žádost"
+          ) : (
+            <LucideLock size={"1rem"} />
+          )}
         </Button>
 
         {position === 0 && <Text>Jste aktuální řečník</Text>}

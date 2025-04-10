@@ -1,10 +1,17 @@
 "use client";
 
-import { getQueue, moveQueue } from "@/actions/queue";
+import {
+  clearQueue,
+  getQueue,
+  moveQueue,
+  toggleQueueState,
+} from "@/actions/queue";
 import { useSocket } from "@/providers/SocketProvider";
 import { Box, Button, Flex, Group, Paper, Stack, Text } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import { QueuePosition, User } from "@prisma/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { LucideArrowUp, LucideTrash } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type QueuePos = QueuePosition & {
@@ -44,17 +51,61 @@ const QueuePage = () => {
     mutationFn: () => moveQueue(),
   });
 
+  const clearMutation = useMutation({
+    mutationFn: () => clearQueue(),
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: () => toggleQueueState(),
+  });
+
+  const openClearPage = () => {
+    modals.openConfirmModal({
+      title: "Vymazat frontu",
+      children: (
+        <Text size="sm">
+          Oprvdu chcete vymazat frontu? Tato akce je nevratná.
+        </Text>
+      ),
+      confirmProps: { color: "red" },
+      onConfirm: () => {
+        clearMutation.mutate();
+      },
+    });
+  };
+
   return (
-    <Flex gap={16}>
+    <Flex gap={16} sx={{ flexGrow: 1 }}>
       <Stack miw={300}>
         <Button
           fullWidth
           loading={moveMutation.isPending}
+          leftSection={<LucideArrowUp size="1rem" />}
+          variant="light"
           onClick={() => {
             moveMutation.mutate();
           }}
         >
           Posunout frontu
+        </Button>
+
+        <Button
+          fullWidth
+          color="red"
+          variant="light"
+          loading={clearMutation.isPending}
+          leftSection={<LucideTrash size="1rem" />}
+          onClick={openClearPage}
+        >
+          Vymazat frontu
+        </Button>
+
+        <Button
+          fullWidth
+          loading={toggleMutation.isPending}
+          onClick={() => toggleMutation.mutate()}
+        >
+          Zamknout/odemknout frontu
         </Button>
       </Stack>
       <Box
@@ -62,6 +113,7 @@ const QueuePage = () => {
           flexGrow: 1,
           display: "grid",
           // repeat minmax
+          gridAutoRows: "max-content",
           gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
           gap: 8,
         }}
@@ -72,12 +124,12 @@ const QueuePage = () => {
             key={qp.id}
             py={4}
             px={12}
+            radius={8}
             sx={{
               backgroundColor: "white",
-              borderRadius: "8px",
-              marginBottom: "8px",
               background: i == 0 ? "#5c0087" : undefined,
               color: i == 0 ? "white" : undefined,
+              // height: "fit-content",
             }}
           >
             <Group>

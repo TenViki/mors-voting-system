@@ -1,4 +1,4 @@
-import { getQueue } from "@/actions/queue";
+import { getQueue, getQueueState } from "@/actions/queue";
 import { useSocket } from "@/providers/SocketProvider";
 import { QueuePosition, User } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +19,11 @@ export const useQueue = () => {
   const queueQuery = useQuery({
     queryKey: ["queue"],
     queryFn: () => getQueue(),
+  });
+
+  const stateQuery = useQuery({
+    queryKey: ["queueStatus"],
+    queryFn: () => getQueueState(),
   });
 
   useEffect(() => {
@@ -42,5 +47,6 @@ export const useQueue = () => {
     isLoading: queueQuery.isLoading,
     isError: queueQuery.isError,
     error: queueQuery.error,
+    state: stateQuery.data,
   };
 };

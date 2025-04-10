@@ -1,4 +1,5 @@
 import { MantineProvider } from "@mantine/core";
+import { ModalsProvider } from "@mantine/modals";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -44,10 +45,17 @@ export default async function RootLayout({
           <MantineEmotionProvider>
             <MantineProvider stylesTransform={emotionTransform}>
               <QueryClientContext>
-                <SocketProvider userToken={token || undefined}>
-                  {children}
-                  <StatusBar />
-                </SocketProvider>
+                <ModalsProvider
+                  labels={{
+                    cancel: "Zrušit",
+                    confirm: "Ano",
+                  }}
+                >
+                  <SocketProvider userToken={token || undefined}>
+                    {children}
+                    <StatusBar />
+                  </SocketProvider>
+                </ModalsProvider>
               </QueryClientContext>
             </MantineProvider>
           </MantineEmotionProvider>

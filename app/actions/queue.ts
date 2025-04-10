@@ -70,3 +70,68 @@ export const moveQueue = async () => {
   getSocketService().broadcastToAll("queue:update", queuePositions);
   getSocketService().broadcastToRoom(firstPos.userId, "queue:leave");
 };
+
+export const clearQueue = async () => {
+  await validateAdmin();
+
+  await prisma.queuePosition.deleteMany({
+    where: {
+      isActive: true,
+    },
+  });
+
+  getSocketService().broadcastToAll("queue:update", []);
+  getSocketService().broadcastToAll("queue:leave");
+};
+
+export const getQueueState = async () => {
+  const q = await prisma.settings.findFirst({
+    where: {
+      name: "queueEnabled",
+    },
+  });
+
+  console.log("Queue state", q);
+
+  if (!q || !q.value) {
+    return true;
+  }
+
+  return q.value === "true";
+};
+
+export const toggleQueueState = async () => {
+  await validateAdmin();
+
+  let q = await prisma.settings.findFirst({
+    where: {
+      name: "queueEnabled",
+    },
+  });
+
+  if (!q) {
+    await prisma.settings.create({
+      data: {
+        name: "queueEnabled",
+        value: "true",
+      },
+    });
+
+    getSocketService().broadcastToAll("queue:enabled");
+  } else {
+    q = await prisma.settings.update({
+      where: {
+        id: q.id,
+      },
+      data: {
+        value: q.value === "true" ? "false" : "true",
+      },
+    });
+
+    if (q.value === "true") {
+      getSocketService().broadcastToAll("queue:enabled");
+    } else {
+      getSocketService().broadcastToAll("queue:disabled");
+    }
+  }
+};

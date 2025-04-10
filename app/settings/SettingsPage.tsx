@@ -1,5 +1,6 @@
 "use client";
 
+import useSearchParamsState from "@/lib/useSearchParamState";
 import { Tabs, TabsList, TabsPanel, Title } from "@mantine/core";
 import {
   LucideKey,
@@ -13,11 +14,16 @@ import VoteKey from "./votekey/VoteKey";
 import VoteSettings from "./votes/VoteSettings";
 
 const SettingsPage = () => {
+  const [tab, setTab] = useSearchParamsState("tab", "votes");
+
   return (
     <>
       <Title mb={16}>Nastavení</Title>
       <Tabs
-        defaultValue={"votes"}
+        value={tab}
+        onChange={(value) => {
+          setTab(value || "votes");
+        }}
         color="#5c0087"
         sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
       >
