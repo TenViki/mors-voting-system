@@ -1,17 +1,18 @@
 "use client";
 
-import {
-  clearQueue,
-  getQueue,
-  moveQueue,
-  toggleQueueState,
-} from "@/actions/queue";
+import { clearQueue, moveQueue, toggleQueueState } from "@/actions/queue";
+import { useQueue } from "@/lib/queue";
 import { useSocket } from "@/providers/SocketProvider";
 import { Box, Button, Flex, Group, Paper, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { QueuePosition, User } from "@prisma/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { LucideArrowUp, LucideTrash } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import {
+  LucideArrowUp,
+  LucideLock,
+  LucideTrash,
+  LucideUnlock,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 type QueuePos = QueuePosition & {
@@ -20,32 +21,8 @@ type QueuePos = QueuePosition & {
 
 const QueuePage = () => {
   const socket = useSocket();
-  const [queuePositions, setQueuePositions] = useState<QueuePos[]>([]);
-
-  const handleQueueUpdate = (queuePositions: QueuePos[]) => {
-    setQueuePositions(queuePositions);
-  };
-
-  const queueQuery = useQuery({
-    queryKey: ["queue"],
-    queryFn: () => getQueue(),
-  });
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("queue:update", handleQueueUpdate);
-
-    return () => {
-      socket.off("queue:update", handleQueueUpdate);
-    };
-  }, [socket]);
-
-  useEffect(() => {
-    if (!queueQuery.data) return;
-
-    setQueuePositions(queueQuery.data);
-  }, [queueQuery.data]);
+  const { queue, state } = useQueue();
+  const [queueLocked, setQueueLocked] = useState(true);
 
   const moveMutation = useMutation({
     mutationFn: () => moveQueue(),
@@ -73,6 +50,26 @@ const QueuePage = () => {
       },
     });
   };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("queue:enabled", () => {
+      setQueueLocked(false);
+    });
+    socket.on("queue:disabled", () => {
+      setQueueLocked(true);
+    });
+
+    return () => {
+      socket.off("queue:enabled");
+      socket.off("queue:disabled");
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    setQueueLocked(!state);
+  }, [state]);
 
   return (
     <Flex gap={16} sx={{ flexGrow: 1 }}>
@@ -104,8 +101,17 @@ const QueuePage = () => {
           fullWidth
           loading={toggleMutation.isPending}
           onClick={() => toggleMutation.mutate()}
+          color="green"
+          variant="light"
+          leftSection={
+            queueLocked ? (
+              <LucideUnlock size="1rem" />
+            ) : (
+              <LucideLock size="1rem" />
+            )
+          }
         >
-          Zamknout/odemknout frontu
+          {queueLocked ? "Odemknout frontu" : "Zamknout frontu"}
         </Button>
       </Stack>
       <Box
@@ -118,7 +124,7 @@ const QueuePage = () => {
           gap: 8,
         }}
       >
-        {queuePositions.map((qp, i) => (
+        {queue.map((qp, i) => (
           <Paper
             withBorder
             key={qp.id}
