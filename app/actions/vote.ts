@@ -30,7 +30,7 @@ export const addVote = async (name: string) => {
     },
   });
 
-  getSocketService().broadcastToAll("votes:add", vote);
+  //getSocketService().broadcastToAll("votes:add", vote);
   return vote;
 };
 
