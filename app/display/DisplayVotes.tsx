@@ -39,10 +39,12 @@ const DisplayVotes: FC<DisplayVotesProps> = ({ voteKey }) => {
 
     socket.on("votes:update", setVotes);
     socket.on("votes:add", (vote) => setVotes((prev) => [...prev, vote]));
+    socket.on("votes:clear", () => setVotes([]));
 
     return () => {
       socket.off("votes:update", setVotes);
       socket.off("votes:add");
+      socket.off("votes:clear");
     };
   }, [socket]);
 
