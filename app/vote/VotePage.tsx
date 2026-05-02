@@ -62,7 +62,7 @@ const VotePage: FC<VotePageProps> = ({ userId }) => {
     "active" | "inactive" | "disabled" | null
   >(null);
   const [currentQueueId, setCurrentQueueId] = React.useState<string | null>(
-    null
+    null,
   );
 
   const votesQuery = useQuery({
@@ -133,6 +133,9 @@ const VotePage: FC<VotePageProps> = ({ userId }) => {
       setQueueStatus(hasVoted ? "active" : "inactive");
     });
     socket.on("user:kick", () => userLogout());
+    socket.on("votes:update", (votes) => {
+      setVotes(votes);
+    });
 
     return () => {
       socket.off("votes:add");
@@ -142,6 +145,7 @@ const VotePage: FC<VotePageProps> = ({ userId }) => {
       socket.off("user:vote", handleUserVoted);
       socket.off("connect", handleConnect);
       socket.off("user:kick");
+      socket.off("votes:update");
 
       socket.off("queue:join");
       socket.off("queue:leave");
