@@ -9,6 +9,8 @@ RUN yarn install --frozen-lockfile --production=false
 
 # copy rest and build
 COPY . .
+# ensure optional static assets directory exists even if absent in git context
+RUN mkdir -p public
 RUN yarn prisma generate --schema=prisma/schema.prisma
 RUN yarn build
 
