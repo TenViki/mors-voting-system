@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mors
+      POSTGRES_PASSWORD: morspass
+      POSTGRES_DB: morsdb
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://mors:morspass@db:5432/morsdb
+      PORT: 6999
+      DB_HOST: db
+      DB_PORT: 5432
+    ports:
+      - "6999:6999"
+    command: ["./start.sh"]
+
+volumes:
+  db-data:

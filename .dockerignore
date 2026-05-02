@@ -1,0 +1,12 @@
+node_modules
+.next
+.env
+.env.local
+.vscode
+dist
+yarn-error.log
+npm-debug.log
+Dockerfile*
+docker-compose*.yml
+**/node_modules
+*.log
