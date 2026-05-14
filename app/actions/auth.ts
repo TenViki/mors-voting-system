@@ -63,7 +63,7 @@ export async function validateUser(throwError = true) {
   try {
     const { payload } = await jwtVerify(
       jwt.value,
-      new TextEncoder().encode(process.env.JWT_SECRET as string)
+      new TextEncoder().encode(process.env.JWT_SECRET as string),
     );
     const user = await prisma.user.findUnique({
       where: {
@@ -88,23 +88,25 @@ export async function validateUser(throwError = true) {
 }
 
 export const userLogout = async () => {
-  // const user = await validateUser();
+  try {
+    const user = await validateUser();
 
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        socketId: null,
+      },
+      include: {
+        currentVote: true,
+      },
+    });
+    getSocketService().broadcastToAll("user:logoff", updatedUser);
+  } catch (e) {
+    console.error("Error during logout:", e);
+  }
 
   const c = await cookies();
   c.delete("user_token");
-
-  const updatedUser = await prisma.user.update({
-    where: {
-      id: user.id,
-    },
-    data: {
-      socketId: null,
-    },
-    include: {
-      currentVote: true,
-    },
-  });
-  getSocketService().broadcastToAll("user:logoff", updatedUser);
-  return updatedUser;
 };
