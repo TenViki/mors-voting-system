@@ -36,6 +36,22 @@ export const resetUsers = async () => {
   return data;
 };
 
+export const deleteUser = async (userId: string) => {
+  await validateAdmin();
+
+  
+  const data = await prisma.user.delete({
+    where: {
+      id: userId,
+    },
+  });
+
+  getSocketService().broadcastToAll("user:logoff", data);
+  getSocketService().broadcastToRoom(userId, "user:kick");
+
+  return data;
+}
+
 export const kickUser = async (userId: string) => {
   await validateAdmin();
 

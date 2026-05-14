@@ -88,11 +88,8 @@ export async function validateUser(throwError = true) {
 }
 
 export const userLogout = async () => {
-  const user = await validateUser();
+  // const user = await validateUser();
 
-  if (!user) {
-    throw new Error("Not authenticated");
-  }
 
   const c = await cookies();
   c.delete("user_token");

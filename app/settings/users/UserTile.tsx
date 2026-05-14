@@ -1,4 +1,4 @@
-import { kickUser } from "@/actions/users";
+import { deleteUser, kickUser } from "@/actions/users";
 import { SPECIAL_VOTES } from "@/vote/VotePage";
 import {
   ActionIcon,
@@ -9,7 +9,8 @@ import {
   Text,
 } from "@mantine/core";
 import { User, Vote } from "@prisma/client";
-import { LucideCheck, LucideLogOut } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { LucideCheck, LucideLogOut, LucideTrash } from "lucide-react";
 import { FC } from "react";
 
 interface UserTileProps {
@@ -17,6 +18,7 @@ interface UserTileProps {
 }
 
 const UserTile: FC<UserTileProps> = ({ user }) => {
+  const queryClient = useQueryClient();
   const getIcon = (vote: Vote | null | undefined) => {
     if (!vote) return null;
 
@@ -52,6 +54,18 @@ const UserTile: FC<UserTileProps> = ({ user }) => {
           disabled={!user.socketId}
         >
           <LucideLogOut size={16} />
+        </ActionIcon>
+
+        <ActionIcon
+          onClick={() => {
+            deleteUser(user.id);
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+          }}
+          color="red"
+          variant="subtle"
+          title="Smazat uživatele"
+        >
+          <LucideTrash size={16} />
         </ActionIcon>
       </Group>
     </Paper>
